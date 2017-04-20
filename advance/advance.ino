@@ -31,15 +31,14 @@ void setup()
 {
   Serial.begin(9600);     // 初始化串口
   Wire.begin(4);
-   Wire.onReceive(receiveEvent);
+  Wire.onReceive(receiveEvent);
   //初始化电机驱动IO为输出方式
   //初始化超声波引脚
-    pinMode(Echo, INPUT);    // 定义超声波输入脚
+  pinMode(Echo, INPUT);    // 定义超声波输入脚
   pinMode(Trig, OUTPUT);   // 定义超声波输出脚
  
    
   pinMode(beep,OUTPUT);
-
   pinMode(SensorLeft_2, INPUT); //定义右红外传感器为输入
   pinMode(SensorRight_2, INPUT); //定义左红外传感器为输入
   
@@ -67,33 +66,40 @@ pinMode(greenled, OUTPUT); //定义绿色小灯接口为输出接口
 
 void receiveEvent(int howMany)
 {
+  int i=0;
+  lcd.clear();
+  lcd.setCursor(0,0);
+  Serial.println("");
+  Serial.print("wire rx ");
   char c;
 // 循环读取接收到的数据，最后一个数据单独读取
   while( Wire.available()>0)
   {
-     c = Wire.read(); // 以字符形式接收数据
- char incomingByte = c;  
-    if(incomingByte=='1' || c=='t'){
-    advance();
-   
-    }
-    else if(incomingByte=='2')
-    back(10);
-    else if(incomingByte=='3')
-    left();
-    else if(incomingByte=='4')
-    right();
-    else if(incomingByte=='5')
-    spin_left(10);
-    else if(incomingByte=='6')
-    spin_right(10);
-    else if(incomingByte=='7' || c=='f')
-    brake(10);
+     c= Wire.read(); // 以字符形式接收数据
     Serial.print(c);       // 串口输出该字符
-  }
+    i++;
+    if(i==11){
+    lcd.setCursor(0,1);
+    }
+  lcd.print(c);
+} 
+    Serial.println("");
+ 
 
 }
 
+void requestEvent() {
+//  Distance_test();
+//  int h,t,o;
+//  if (Distance<1000){
+//    h=(int)(Distance%1000);
+//    Wire.write(h); // respond with message of 6 bytes
+//
+//  
+//  }
+//    Serial.println(h);
+//  // as expected by master
+}
 
 void Distance_test()   // 量出前方距离 
 {
@@ -208,8 +214,8 @@ void back(int time)          //后退
 
 void loop()
 {
- Serialreading();
- distanceDisplay();
+// Serialreading();
+// distanceDisplay();
     //Distance_test();
  /* digitalWrite(greenled, LOW);
   //keysacn();	   //调用按键扫描函数
