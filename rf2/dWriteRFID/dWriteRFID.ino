@@ -1,7 +1,6 @@
 
 #include <SPI.h>
 #include <RFID.h>
-#include <Wire.h>
 
 unsigned char serNum[5];//鍐欏崱鏁版嵁
 RFID rfid(10,9);    //D10--璇诲崱鍣∕OSI寮曡剼銆丏5--璇诲崱鍣≧ST寮曡剼
@@ -36,7 +35,6 @@ void setup()
 
    Serial.begin(9600);
    SPI.begin();
-   Wire.begin(); 
 
 
 }
@@ -71,54 +69,48 @@ analogWrite(greenled, 0);
   if (rfid.readCardSerial())
   {
   //  Serial.print ("The card's number is  : ");
-    Serial.print (rfid.serNum[0],HEX);
-    Serial.print(rfid.serNum[1],HEX);
-    Serial.print(rfid.serNum[2],HEX);
-    Serial.print(rfid.serNum[3],HEX);
+//    Serial.print (rfid.serNum[0],HEX);
+//    Serial.print(rfid.serNum[1],HEX);
+//    Serial.print(rfid.serNum[2],HEX);
+//    Serial.print(rfid.serNum[3],HEX);
 
-     Serial.println(" ");
-
+     Serial.write(23);
+  analogWrite(greenled, 255);
+  delay(500);
     ///////////////////////////////////
 
      if( rfid.serNum[0]==0x8B && rfid.serNum[1]==0x7B && rfid.serNum[2]==0x66 && rfid.serNum[3]==0xB8 ) {
- 
-              Wire.beginTransmission(4); //向地址为4的从机传送数据
-              Wire.write("t");              // 发送1个字节的数据
-              Wire.endTransmission();    // 结束传送
+
            access_granted();
             } 
 
         else{
-  
-            Wire.beginTransmission(4); //向地址为4的从机传送数据
-            
-            Wire.endTransmission();    // 结束传送
+ 
             access_denied();
         }
        ///////////////////////////
-     rfid.selectTag(rfid.serNum);
-
-  if (rfid.auth(PICC_AUTHENT1A, blockAddr, sectorKeyA[blockAddr/4], rfid.serNum) == MI_OK)
-  {
-    
-            blockAddr = blockAddr - 3 ; //鏁版嵁鍧�4
-            if(true )
-            {
-              rfid.read(blockAddr, str);
-              
-        //      Serial.print("Read from the card ,the data is : ");
-              Serial.println((char *)str);
-      //        lcd.setCursor(0,0);
-        //      lcd.print((char *)str);
-              
-                Wire.beginTransmission(4); //向地址为4的从机传送数据
-                Wire.write((char*)str);              // 发送1个字节的数据
-                Wire.endTransmission();    // 结束传送
-            }
-               blockAddr = blockAddr + 3 ; //鏁版嵁鍧�4
-          } 
+//     rfid.selectTag(rfid.serNum);
+//
+//  if (rfid.auth(PICC_AUTHENT1A, blockAddr, sectorKeyA[blockAddr/4], rfid.serNum) == MI_OK)
+//  {
+//    
+//            blockAddr = blockAddr - 3 ; //鏁版嵁鍧�4
+//            if(true )
+//            {
+//              rfid.read(blockAddr, str);
+//              
+//        //      Serial.print("Read from the card ,the data is : ");
+//              Serial.println((char *)str);
+//      //        lcd.setCursor(0,0);
+//        //      lcd.print((char *)str);
+//              
+//         
+//                Serial.println((char*)str);              // 发送1个字节的数据
+//                    // 结束传送
+//            }
+//               blockAddr = blockAddr + 3 ; //鏁版嵁鍧�4
+//          } 
   }
- 
-    Serial.println("!!!");  
+  
 }//@end of loop
 

@@ -14,15 +14,11 @@ int Right_motor_back=11;    // 右电机后退(IN4)
 LiquidCrystal lcd(8,7,6,5,4,3,2); //4数据口模式连线声明
 int i;
 
-int yellowled=2;
-int greenled=3;
-int Echo = A1;  // Echo回声脚(P2.0)
-int Trig =A0;  //  Trig 触发脚(P2.1)
-int Distance = 0;
-int beep = A3;
 
-const int SensorLeft_2 = A2;   	//右红外传感器(P3.4 OUT3)
-const int SensorRight_2 = A3;     //左红外传感器(P3.5 OUT4)
+int Echo = A1;  // Echo回声脚(P2.0)
+int Trig =A2;  //  Trig 触发脚(P2.1)
+int Distance = 0;
+
 
 int SL_2;    //左红外传感器状态
 int SR_2;    //右红外传感器状态
@@ -37,13 +33,7 @@ void setup()
   pinMode(Echo, INPUT);    // 定义超声波输入脚
   pinMode(Trig, OUTPUT);   // 定义超声波输出脚
  
-   
-  pinMode(beep,OUTPUT);
-  pinMode(SensorLeft_2, INPUT); //定义右红外传感器为输入
-  pinMode(SensorRight_2, INPUT); //定义左红外传感器为输入
   
-pinMode(yellowled, OUTPUT); //定义黄色小灯接口为输出接口
-pinMode(greenled, OUTPUT); //定义绿色小灯接口为输出接口
 
   lcd.begin(16,2);      //初始化1602液晶工作                       模式
                        //定义1602液晶显示范围为2行16列字符
@@ -51,8 +41,7 @@ pinMode(greenled, OUTPUT); //定义绿色小灯接口为输出接口
    lcd.home();        //把光标移回左上角，即从头开始输出   
     lcd.print("Hello World!"); //显示
    
-    digitalWrite(yellowled, HIGH);//点亮红色小灯
-    digitalWrite(greenled, HIGH);//点亮红色小灯
+ 
   //初始化电机驱动IO为输出方式
   pinMode(Left_motor_go,OUTPUT); // PIN 8 8脚无PWM功能
   pinMode(Left_motor_back,OUTPUT); // PIN 9 (PWM)
@@ -63,6 +52,7 @@ pinMode(greenled, OUTPUT); //定义绿色小灯接口为输出接口
 
 }
 
+char commandArray [7];
 
 void receiveEvent(int howMany)
 {
@@ -81,11 +71,44 @@ void receiveEvent(int howMany)
     if(i==11){
     lcd.setCursor(0,1);
     }
+    if(i>=11 && i<=17){
+    commandArray[i-11] = c;
+    }
   lcd.print(c);
 } 
+  lcd.print(Distance);
     Serial.println("");
- 
+   
+ int timeout = (int)(commandArray[5])-48;  
+ Serial.println(timeout);
+ Serial.println("!!!");
+ Serial.println((char)commandArray[0]);
+  Serial.println((char)commandArray[1]);
+   Serial.println((char)commandArray[2]);
+    Serial.println((char)commandArray[3]);
+     Serial.println((char)commandArray[4]);
+      Serial.println((char)commandArray[5]);
+       Serial.println((char)commandArray[6]);
 
+   if((char)commandArray[0]=='F'&&(char)commandArray[1]=='O'&&(char)commandArray[2]=='R'&&(char)commandArray[3]=='W'&&(char)commandArray[4]=='D'){
+   advance();
+      Serial.println("go");
+   }
+ if((char)commandArray[0]=='B'&&(char)commandArray[1]=='A'&&(char)commandArray[2]=='C'&&(char)commandArray[3]=='K'&&(char)commandArray[4]=='S'){
+   back(0);
+      Serial.println("bk");
+   } if((char)commandArray[0]=='S'&&(char)commandArray[1]=='T'&&(char)commandArray[2]=='O'&&(char)commandArray[3]=='P'&&(char)commandArray[4]=='S'){
+   brake(0);
+      Serial.println("stop");
+   } if((char)commandArray[0]=='L'&&(char)commandArray[1]=='E'&&(char)commandArray[2]=='F'&&(char)commandArray[3]=='T'&&(char)commandArray[4]=='S'){
+   left();
+      Serial.println("lt");
+   } if((char)commandArray[0]=='R'&&(char)commandArray[1]=='I'&&(char)commandArray[2]=='G'&&(char)commandArray[3]=='H'&&(char)commandArray[4]=='T'){
+   right();
+      Serial.println("RT");
+   }
+  
+   
 }
 
 void requestEvent() {
@@ -214,6 +237,14 @@ void back(int time)          //后退
 
 void loop()
 {
+  Distance_test();
+  if(Distance<20){
+  brake(0);
+  analogWrite(A3,200);
+  }
+  else{
+  analogWrite(A3,0);
+  }
 // Serialreading();
 // distanceDisplay();
     //Distance_test();
@@ -256,47 +287,12 @@ void loop()
       spin_right(4.5);//有旋转，调整方向
     }
   }*/
-   // Serialreading();
+   
 }
-
   
 void distanceDisplay(){
    Distance_test();
   
-  if((2<Distance)&(Distance<400))//超声波测距范围2cm到400cm
-  {
-    digitalWrite(greenled, HIGH);//点亮红色小灯
-        digitalWrite(yellowled, LOW);//点亮红色小灯
-    lcd.clear();
-    lcd.home();        //把光标移回左上角，即从头开始输出   
-    lcd.print("Ultrasonic Dist.");       //显示
-    lcd.setCursor(0,1);   //把光标定位在第2行，第6列
-    lcd.print(Distance);       //显示距离
-    lcd.print("cm");    
-    if(digitalRead(SensorLeft_2) == HIGH)
-    lcd.print("<");
-    if(digitalRead(SensorRight_2) == HIGH)    //显示
-    lcd.print(">");  
-}
-  else
-  {
-    lcd.clear();
-    
-    lcd.home();        //把光标移回左上角，即从头开始输出  
-    lcd.print("CLEAR =w=");       //显示超出距离
-    lcd.setCursor(0,1);
-      lcd.setCursor(0,1);   //把光标定位在第2行，第6列
-    lcd.print(Distance);       //显示距离
-    lcd.print("cm");    
-    if(digitalRead(SensorLeft_2) == HIGH)
-    lcd.print("<");
-    if(digitalRead(SensorRight_2) == HIGH)    //显示
-    lcd.print(">");  
-   digitalWrite(yellowled, HIGH);//点亮红色小灯
-    digitalWrite(greenled, LOW);//点亮红色小灯
-  } 
-  
- 
 }
 
 int incomingByte =  0; 
